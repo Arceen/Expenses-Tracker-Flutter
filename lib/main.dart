@@ -1,14 +1,23 @@
-import 'package:expenses_tracker/transaction.dart';
+import 'package:expenses_tracker/models/transaction.dart';
+import 'package:expenses_tracker/widgets/new_transaction.dart';
+import 'package:expenses_tracker/widgets/transaction_list.dart';
+import 'package:expenses_tracker/widgets/user_transaction.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart' show DateFormat;
 
 void main() => runApp(MaterialApp(
       title: 'Expenses Tracker App',
       home: MyHomePage(),
     ));
 
-class MyHomePage extends StatelessWidget {
-  var transactions = [
+class MyHomePage extends StatefulWidget {
+  MyHomePage({Key? key}) : super(key: key);
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  final List<Transaction> _transactions = [
     Transaction(
       transactionId: 't1',
       transactionTitle: 'Bought Fruits',
@@ -24,116 +33,55 @@ class MyHomePage extends StatelessWidget {
       transactionDateTime: DateTime.now(),
     ),
   ];
-  String? inputAmount;
-  String? inputTitle;
-  MyHomePage({Key? key}) : super(key: key);
+
+  void addNewTransaction(
+      {required String title,
+      required double amount,
+      required DateTime date,
+      required bool spent}) {
+    setState(() {
+      _transactions.add(Transaction(
+        transactionId: title + amount.toString() + date.toString(),
+        transactionTitle: title,
+        spent: spent,
+        transactionAmount: amount,
+        transactionDateTime: date,
+      ));
+    });
+  }
+
+  void _startAddNewTransaction(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (buildCtx) {
+          return NewTransaction(addNewTransaction: addNewTransaction);
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           title: Text('Flutter App'),
+          actions: [
+            IconButton(
+              onPressed: () => _startAddNewTransaction(context),
+              icon: Icon(Icons.add),
+            ),
+          ],
         ),
-        body: Center(
-            child: Column(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _startAddNewTransaction(context),
+          child: Icon(Icons.add),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              height: 50,
-              width: double.infinity,
-              child: Card(
-                color: Colors.amber,
-                child: Text('CHART'),
-                elevation: 5,
-              ),
-            ),
-            Card(
-              elevation: 3,
-              child: Container(
-                padding: EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Title',
-                      ),
-                      onChanged: (val) => inputTitle = val,
-                    ),
-                    TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Amount',
-                      ),
-                      onChanged: (val) => inputTitle = val,
-                    ),
-                    TextButton(
-                      child: const Text(
-                        'Add Transaction',
-                        style: TextStyle(color: Colors.blueAccent),
-                      ),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Column(
-              children: transactions
-                  .map(
-                    (e) => Card(
-                      elevation: 3,
-                      child: Row(
-                        // mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Container(
-                            margin: EdgeInsets.symmetric(
-                                vertical: 10, horizontal: 15),
-                            child: Text(
-                              '\$' + e.transactionAmount.toString(),
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                  color: e.spent!
-                                      ? Colors.deepOrange
-                                      : Colors.green),
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                width: 2,
-                                color:
-                                    e.spent! ? Colors.deepOrange : Colors.green,
-                              ),
-                            ),
-                            padding: EdgeInsets.all(10),
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                e.transactionTitle!,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              Text(
-                                DateFormat.yMMMd()
-                                    .format(e.transactionDateTime)
-                                    .toString(),
-                                style: TextStyle(
-                                    color: Colors.grey.shade700, fontSize: 12),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                  .toList(),
-            ),
+            TransactionList(transactions: _transactions),
           ],
-        )));
+        ));
   }
 }
