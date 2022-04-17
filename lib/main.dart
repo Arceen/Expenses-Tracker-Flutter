@@ -1,12 +1,20 @@
 import 'package:expenses_tracker/models/transaction.dart';
+import 'package:expenses_tracker/widgets/charts_widget.dart';
 import 'package:expenses_tracker/widgets/new_transaction.dart';
 import 'package:expenses_tracker/widgets/transaction_list.dart';
 import 'package:expenses_tracker/widgets/user_transaction.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MaterialApp(
-      title: 'Expenses Tracker App',
+      title: 'Expenses Tracker',
       home: MyHomePage(),
+      theme: ThemeData(
+          primarySwatch: Colors.teal,
+          textTheme: GoogleFonts.quicksandTextTheme(),
+          appBarTheme: AppBarTheme(
+            textTheme: GoogleFonts.openSansTextTheme(),
+          )),
     ));
 
 class MyHomePage extends StatefulWidget {
@@ -75,13 +83,23 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Icon(Icons.add),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        body: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TransactionList(transactions: _transactions),
-          ],
+        body: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ChartWidget(
+                  transactions: _transactions
+                      .where((element) =>
+                          element.transactionDateTime
+                              .difference(DateTime.now())
+                              .inDays <=
+                          7)
+                      .toList()),
+              TransactionList(transactions: _transactions),
+            ],
+          ),
         ));
   }
 }

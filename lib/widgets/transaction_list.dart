@@ -2,17 +2,21 @@ import 'package:expenses_tracker/models/transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class TransactionList extends StatelessWidget {
-  final List<Transaction> transactions;
-  const TransactionList({Key? key, required this.transactions})
-      : super(key: key);
+class TransactionList extends StatefulWidget {
+  List<Transaction> transactions;
+  TransactionList({Key? key, required this.transactions}) : super(key: key);
 
+  @override
+  State<TransactionList> createState() => _TransactionListState();
+}
+
+class _TransactionListState extends State<TransactionList> {
   @override
   Widget build(BuildContext context) {
     return Flexible(
       child: ListView.builder(
         shrinkWrap: true,
-        itemCount: transactions.length,
+        itemCount: widget.transactions.length,
         itemBuilder: ((context, index) => Card(
               elevation: 3,
               child: Row(
@@ -22,20 +26,19 @@ class TransactionList extends StatelessWidget {
                     margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                     child: Text(
                       '\$' +
-                          transactions[index]
-                              .transactionAmount!
+                          widget.transactions[index].transactionAmount!
                               .toStringAsFixed(2),
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
-                          color: transactions[index].spent!
+                          color: widget.transactions[index].spent!
                               ? Colors.deepOrange
                               : Colors.green),
                     ),
                     decoration: BoxDecoration(
                       border: Border.all(
                         width: 2,
-                        color: transactions[index].spent!
+                        color: widget.transactions[index].spent!
                             ? Colors.deepOrange
                             : Colors.green,
                       ),
@@ -47,7 +50,7 @@ class TransactionList extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        transactions[index].transactionTitle!,
+                        widget.transactions[index].transactionTitle!,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
@@ -55,13 +58,23 @@ class TransactionList extends StatelessWidget {
                       ),
                       Text(
                         DateFormat.yMMMd()
-                            .format(transactions[index].transactionDateTime)
+                            .format(
+                                widget.transactions[index].transactionDateTime)
                             .toString(),
                         style: TextStyle(
                             color: Colors.grey.shade700, fontSize: 12),
                       ),
                     ],
                   ),
+                  SizedBox(width: 50),
+                  IconButton(
+                      icon: Icon(Icons.delete,
+                          color: Theme.of(context).primaryColor),
+                      onPressed: () {
+                        setState(() {
+                          widget.transactions.removeAt(index);
+                        });
+                      }),
                 ],
               ),
             )),
